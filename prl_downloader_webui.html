@@ -1,0 +1,1106 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>凝聚态论文下载面板</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --ink: #182129;
+      --muted: #5b6a72;
+      --panel: rgba(255, 252, 246, 0.86);
+      --panel-strong: rgba(255, 255, 255, 0.94);
+      --border: rgba(24, 33, 41, 0.12);
+      --accent: #0f766e;
+      --accent-soft: rgba(15, 118, 110, 0.12);
+      --warn: #c26a2d;
+      --danger: #ae3d3d;
+      --shadow: 0 22px 50px rgba(33, 37, 41, 0.10);
+      --radius: 24px;
+      --radius-sm: 16px;
+      --mono: "JetBrains Mono", "Cascadia Code", monospace;
+      --sans: "Aptos", "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(15, 118, 110, 0.16), transparent 28rem),
+        radial-gradient(circle at top right, rgba(194, 106, 45, 0.16), transparent 24rem),
+        linear-gradient(180deg, #f7f2e8 0%, #efe8dc 100%);
+      color: var(--ink);
+      font-family: var(--sans);
+    }
+
+    body {
+      padding: 28px;
+    }
+
+    .app {
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.9fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main,
+    .hero-side,
+    .form-card,
+    .status-card,
+    .log-card,
+    .files-card {
+      padding: 22px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      line-height: 1.05;
+      margin-bottom: 14px;
+    }
+
+    .hero-copy {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 54rem;
+    }
+
+    .hero-points {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .hero-point {
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.52);
+      border: 1px solid rgba(24, 33, 41, 0.08);
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.94), rgba(250,247,241,0.82));
+    }
+
+    .stat-chip {
+      display: grid;
+      gap: 5px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--panel-strong);
+    }
+
+    .stat-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .stat-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 22px;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .card-head p {
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: 42rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-wide {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 0.83rem;
+      font-weight: 500;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid rgba(24, 33, 41, 0.14);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--ink);
+      padding: 12px 14px;
+      font: inherit;
+      min-height: 46px;
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .toggle {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(24, 33, 41, 0.12);
+      background: rgba(255, 255, 255, 0.72);
+      cursor: pointer;
+      color: var(--muted);
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+
+    .toggle:hover {
+      transform: translateY(-1px);
+    }
+
+    .toggle input {
+      width: auto;
+      min-height: 0;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .toggle.active {
+      background: var(--accent-soft);
+      border-color: rgba(15, 118, 110, 0.34);
+      color: var(--ink);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0f766e, #15988f);
+      color: white;
+      box-shadow: 0 16px 28px rgba(15, 118, 110, 0.22);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.84);
+      color: var(--ink);
+      border: 1px solid rgba(24, 33, 41, 0.12);
+    }
+
+    .btn-danger {
+      background: rgba(174, 61, 61, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(174, 61, 61, 0.18);
+    }
+
+    .preview {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(20, 28, 34, 0.05);
+      border: 1px dashed rgba(20, 28, 34, 0.15);
+    }
+
+    .preview-label {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .preview-value {
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .preview code,
+    .status-card code,
+    .files-card code {
+      font-family: var(--mono);
+      word-break: break-all;
+      background: rgba(17, 24, 39, 0.06);
+      border-radius: 10px;
+      padding: 2px 6px;
+    }
+
+    .status-card {
+      display: grid;
+      gap: 14px;
+    }
+
+    .progress-card {
+      display: grid;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(24, 33, 41, 0.08);
+    }
+
+    .progress-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      font-weight: 700;
+    }
+
+    .progress-track {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(24, 33, 41, 0.10);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #0f766e, #15988f);
+      transition: width 0.22s ease;
+    }
+
+    .progress-text {
+      color: var(--muted);
+      line-height: 1.5;
+      min-height: 1.5em;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      background: rgba(91, 106, 114, 0.12);
+      color: var(--muted);
+    }
+
+    .status-pill.running {
+      background: rgba(15, 118, 110, 0.14);
+      color: var(--accent);
+    }
+
+    .status-pill.completed {
+      background: rgba(15, 118, 110, 0.12);
+      color: var(--accent);
+    }
+
+    .status-pill.failed {
+      background: rgba(174, 61, 61, 0.12);
+      color: var(--danger);
+    }
+
+    .status-pill.stopping,
+    .status-pill.stopped {
+      background: rgba(194, 106, 45, 0.14);
+      color: var(--warn);
+    }
+
+    .kv {
+      display: grid;
+      gap: 12px;
+    }
+
+    .kv-row {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .kv-key {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .kv-value {
+      font-weight: 600;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    .log-card {
+      overflow: hidden;
+    }
+
+    .log-box {
+      margin-top: 12px;
+      min-height: 360px;
+      max-height: 620px;
+      overflow: auto;
+      padding: 16px;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(14, 23, 32, 0.98), rgba(20, 31, 44, 0.96));
+      color: #d6f3ee;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .files-card {
+      display: grid;
+      gap: 14px;
+    }
+
+    .banner {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(174, 61, 61, 0.18);
+      background: rgba(174, 61, 61, 0.10);
+      color: var(--danger);
+      font-weight: 600;
+      line-height: 1.6;
+    }
+
+    .banner.show {
+      display: block;
+    }
+
+    .file-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .file-item {
+      padding: 14px 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(24, 33, 41, 0.10);
+      background: rgba(255, 255, 255, 0.78);
+      display: grid;
+      gap: 6px;
+    }
+
+    .file-name {
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .file-meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+    }
+
+    .empty {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.58);
+      color: var(--muted);
+      border: 1px dashed rgba(24, 33, 41, 0.12);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 1100px) {
+      .hero,
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      body {
+        padding: 14px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .kv-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .card,
+      .hero-main,
+      .hero-side,
+      .form-card,
+      .status-card,
+      .log-card,
+      .files-card {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="hero">
+      <article class="card hero-main">
+        <p class="eyebrow">Multi-Publisher Condensed Matter Panel</p>
+        <h1>把最近论文下载流程变成一块可视化控制台</h1>
+        <p class="hero-copy">
+          这个页面现在把高频控制项集中成几块：最近天数、日期基准、保存目录、查询站点和并行搜索。
+          后台已经支持 APS、ACS、Springer Nature、Wiley、AAAS、RSC、IOP、AIP、PNAS 和 Nano Research 这些来源；能走官方 RSS 的优先走 RSS，其他来源再按站点结构抓取。
+        </p>
+        <div class="hero-points">
+          <div class="hero-point">领域判断固定依据：官方栏目、期刊范围、APS PhySH、ACS Subjects 和标题摘要关键词规则，不接大模型。</div>
+          <div class="hero-point">下载方式固定：在摘要页内复用同一浏览器会话直接抓 PDF 二进制；如果 Cloudflare 或类似验证在无头模式下过不去，会自动切换到有头浏览器，并启用更隐蔽的抓取参数。</div>
+          <div class="hero-point">你只需要决定时间窗口、保存位置和要查的站点，其他交给脚本。</div>
+        </div>
+      </article>
+      <aside class="card hero-side">
+        <div class="stat-chip">
+          <div class="stat-label">固定范围</div>
+          <div class="stat-value">10 个来源 / 多出版商</div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">今天</div>
+          <div class="stat-value" id="heroDate"></div>
+        </div>
+        <div class="stat-chip">
+          <div class="stat-label">固定策略</div>
+          <div class="stat-value">后台默认重试与会话复用</div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="layout">
+      <div class="stack">
+        <section class="card form-card">
+          <div class="card-head">
+            <div>
+              <h2>运行参数</h2>
+              <p>这里只保留 3 个输入项。最近天数决定时间窗口，日期基准留空就按今天算，保存目录决定 PDF 落盘位置。</p>
+            </div>
+          </div>
+
+          <div class="banner" id="backendBanner"></div>
+
+          <div class="grid">
+            <div class="field">
+              <label for="days">最近天数 <span class="hint">包含今天</span></label>
+              <input id="days" name="days" type="number" min="1" step="1">
+            </div>
+
+            <div class="field">
+              <label for="today">日期基准 <span class="hint">留空就用系统日期</span></label>
+              <input id="today" name="today" type="date">
+            </div>
+
+            <div class="field field-wide">
+              <label for="outputDir">保存目录 <span class="hint">PDF 输出路径</span></label>
+              <input id="outputDir" name="outputDir" type="text" spellcheck="false">
+            </div>
+
+            <div class="field field-wide">
+              <label>查询站点 <span class="hint">可单选也可多选</span></label>
+              <div class="chip-row" id="sourceGroup"></div>
+              <div class="chip-row" style="margin-top: 12px;">
+                <label class="toggle" id="parallelSitesToggle">
+                  <input id="parallelSites" type="checkbox">
+                  尽量并行搜索
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" id="startButton" type="button">开始运行</button>
+            <button class="btn-danger" id="stopButton" type="button">终止任务</button>
+            <button class="btn-secondary" id="openFolderButton" type="button">打开输出目录</button>
+          </div>
+
+          <div class="preview">
+            <div>
+              <div class="preview-label">日期窗口</div>
+              <div class="preview-value" id="windowPreview"></div>
+            </div>
+            <div>
+              <div class="preview-label">固定规则</div>
+              <div class="preview-value" id="fixedPreview"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card log-card">
+          <div class="card-head">
+            <div>
+              <h2>运行日志</h2>
+              <p>这里会实时显示下载脚本输出。站点触发验证、切换有头浏览器或做 VPN/代理排查时，最容易从这里看到进展。</p>
+            </div>
+          </div>
+          <pre class="log-box" id="logBox">等待启动…</pre>
+        </section>
+      </div>
+
+      <div class="stack">
+        <section class="card status-card">
+          <div class="card-head">
+            <div>
+              <h2>任务状态</h2>
+              <p>当前只保留最近一次任务的状态和结果。</p>
+            </div>
+          </div>
+
+          <div class="status-pill idle" id="statusPill">空闲</div>
+
+          <div class="progress-card">
+            <div class="progress-head">
+              <span>任务进度</span>
+              <span id="progressPercent">0%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">等待任务启动</div>
+          </div>
+
+          <div class="kv">
+            <div class="kv-row">
+              <div class="kv-key">任务 ID</div>
+              <div class="kv-value" id="jobIdValue">-</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-key">开始时间</div>
+              <div class="kv-value" id="startedAtValue">-</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-key">结束时间</div>
+              <div class="kv-value" id="endedAtValue">-</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-key">退出码</div>
+              <div class="kv-value" id="returnCodeValue">-</div>
+            </div>
+            <div class="kv-row">
+              <div class="kv-key">输出目录</div>
+              <div class="kv-value" id="outputDirValue">-</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card files-card">
+          <div class="card-head">
+            <div>
+              <h2>输出文件</h2>
+              <p>下载完成后会列出当前输出目录里的文件。需要进一步查看时可以直接点“打开输出目录”。</p>
+            </div>
+          </div>
+          <div class="file-list" id="fileList">
+            <div class="empty">还没有可展示的文件。</div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </div>
+
+  <script id="appBootstrap" type="application/json">{{ app_json | safe }}</script>
+  <script>
+    function buildFallbackBootstrap() {
+      return {
+        defaults: {
+          days: 3,
+          today: "",
+          section: "condensed-matter-and-materials",
+          sources: ["aps", "acs"],
+          parallel_sites: true,
+          output_dir: "",
+          user_data_dir: "",
+          headless: false,
+          overwrite: false,
+          list_only: false,
+          max_pages: 20,
+          retries: 4,
+          timeout_ms: 120000,
+        },
+        currentDate: new Date().toISOString().slice(0, 10),
+        sourceOptions: [
+          { value: "aps", label: "APS" },
+          { value: "acs", label: "ACS" },
+          { value: "springer_nature", label: "Springer Nature" },
+          { value: "wiley", label: "Wiley" },
+          { value: "aaas", label: "AAAS" },
+          { value: "rsc", label: "RSC" },
+          { value: "iop", label: "IOP" },
+          { value: "aip", label: "AIP" },
+          { value: "nas", label: "PNAS" },
+          { value: "nano_research", label: "Nano Research" },
+        ],
+      };
+    }
+
+    function loadBootstrap() {
+      const node = document.getElementById("appBootstrap");
+      const raw = (node?.textContent || "").trim();
+      if (raw && !raw.includes("{{") && !raw.includes("}}")) {
+        try {
+          return JSON.parse(raw);
+        } catch (error) {
+        }
+      }
+      return buildFallbackBootstrap();
+    }
+
+    const appConfig = loadBootstrap();
+    const STORAGE_KEY = "prl-downloader-form";
+    const formEls = {
+      days: document.getElementById("days"),
+      today: document.getElementById("today"),
+      outputDir: document.getElementById("outputDir"),
+      parallelSites: document.getElementById("parallelSites"),
+    };
+
+    const heroDate = document.getElementById("heroDate");
+    const windowPreview = document.getElementById("windowPreview");
+    const fixedPreview = document.getElementById("fixedPreview");
+    const logBox = document.getElementById("logBox");
+    const fileList = document.getElementById("fileList");
+    const backendBanner = document.getElementById("backendBanner");
+    const statusPill = document.getElementById("statusPill");
+    const jobIdValue = document.getElementById("jobIdValue");
+    const startedAtValue = document.getElementById("startedAtValue");
+    const endedAtValue = document.getElementById("endedAtValue");
+    const returnCodeValue = document.getElementById("returnCodeValue");
+    const outputDirValue = document.getElementById("outputDirValue");
+    const progressFill = document.getElementById("progressFill");
+    const progressPercent = document.getElementById("progressPercent");
+    const progressText = document.getElementById("progressText");
+
+    const sourceGroup = document.getElementById("sourceGroup");
+    const parallelSitesToggle = document.getElementById("parallelSitesToggle");
+
+    const startButton = document.getElementById("startButton");
+    const stopButton = document.getElementById("stopButton");
+    const openFolderButton = document.getElementById("openFolderButton");
+
+    let pollTimer = null;
+    let backendHealthy = true;
+
+    function bytesToHuman(size) {
+      const units = ["B", "KB", "MB", "GB"];
+      let value = Number(size);
+      let index = 0;
+      while (value >= 1024 && index < units.length - 1) {
+        value /= 1024;
+        index += 1;
+      }
+      return `${value.toFixed(value >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
+    }
+
+    function isoDateToLocal(dateString) {
+      if (!dateString) return null;
+      const parts = dateString.split("-").map(Number);
+      if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function formatDate(dateObj) {
+      if (!(dateObj instanceof Date) || Number.isNaN(dateObj.valueOf())) return "-";
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatTimestamp(value) {
+      if (!value) return "-";
+      const date = new Date(value);
+      if (Number.isNaN(date.valueOf())) return value;
+      return date.toLocaleString();
+    }
+
+    function readStoredForm() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    function saveForm() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(getFormData()));
+    }
+
+    function sourceInputs() {
+      return Array.from(sourceGroup.querySelectorAll('input[name="source"]'));
+    }
+
+    function renderSourceOptions() {
+      sourceGroup.innerHTML = "";
+      for (const option of appConfig.sourceOptions || []) {
+        const label = document.createElement("label");
+        label.className = "toggle";
+        label.dataset.source = option.value;
+        label.innerHTML = `
+          <input type="checkbox" name="source" value="${option.value}">
+          ${option.label}
+        `;
+        sourceGroup.appendChild(label);
+      }
+    }
+
+    function selectedSources() {
+      return sourceInputs().filter((input) => input.checked).map((input) => input.value);
+    }
+
+    function syncToggleState() {
+      for (const input of sourceInputs()) {
+        input.parentElement.classList.toggle("active", input.checked);
+      }
+      parallelSitesToggle.classList.toggle("active", formEls.parallelSites.checked);
+      parallelSitesToggle.style.opacity = "1";
+    }
+
+    function getFormData() {
+      return {
+        days: Number(formEls.days.value || appConfig.defaults.days),
+        today: formEls.today.value || "",
+        output_dir: formEls.outputDir.value.trim(),
+        sources: selectedSources(),
+        parallel_sites: formEls.parallelSites.checked,
+      };
+    }
+
+    function fillForm() {
+      const stored = readStoredForm();
+      const merged = { ...appConfig.defaults, ...stored };
+      formEls.days.value = merged.days;
+      formEls.today.value = merged.today || "";
+      formEls.outputDir.value = merged.output_dir;
+      const sources = Array.isArray(merged.sources) ? merged.sources : appConfig.defaults.sources;
+      for (const input of sourceInputs()) {
+        input.checked = sources.includes(input.value);
+      }
+      formEls.parallelSites.checked = Boolean(merged.parallel_sites ?? appConfig.defaults.parallel_sites);
+      syncToggleState();
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const form = getFormData();
+      const baseDate = form.today ? isoDateToLocal(form.today) : isoDateToLocal(appConfig.currentDate);
+      const days = Number.isFinite(form.days) && form.days > 0 ? form.days : 1;
+      const startDate = new Date(baseDate);
+      startDate.setDate(startDate.getDate() - (days - 1));
+      windowPreview.textContent = `${formatDate(startDate)} 到 ${formatDate(baseDate)}（含首尾）`;
+      const labelMap = Object.fromEntries((appConfig.sourceOptions || []).map((option) => [option.value, option.label]));
+      const sourcesLabel = form.sources.length ? form.sources.map((item) => labelMap[item] || item.toUpperCase()).join(" + ") : "未选择站点";
+      const parallelLabel = form.parallel_sites ? "已开启并行搜索" : "串行搜索";
+      fixedPreview.textContent = `当前选择 ${sourcesLabel}；${parallelLabel}。脚本会优先使用官方 RSS、官方栏目、期刊范围和站点自带主题标签，再用标题/摘要规则筛凝聚态结果，并在访问异常时优先排查 VPN/代理。`;
+      saveForm();
+    }
+
+    function renderProgress(progress, status) {
+      if (!progress) {
+        const percent = status === "completed" ? 100 : 0;
+        progressFill.style.width = `${percent}%`;
+        progressPercent.textContent = `${percent}%`;
+        progressText.textContent = status === "completed" ? "任务已完成" : "等待任务启动";
+        return;
+      }
+
+      const total = Math.max(Number(progress.total) || 0, 1);
+      const current = Math.max(0, Number(progress.current) || 0);
+      const percent = Math.max(0, Math.min(100, Math.round((current / total) * 100)));
+      progressFill.style.width = `${percent}%`;
+      progressPercent.textContent = `${percent}%`;
+      const sourceText = progress.source ? `[${String(progress.source).toUpperCase()}] ` : "";
+      progressText.textContent = `${sourceText}${progress.label || "进行中"}`;
+    }
+
+    async function api(path, options = {}) {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "请求失败");
+      }
+      return data;
+    }
+
+    function setBackendBanner(message) {
+      if (!message) {
+        backendBanner.classList.remove("show");
+        backendBanner.textContent = "";
+        backendHealthy = true;
+        return;
+      }
+      backendBanner.classList.add("show");
+      backendBanner.textContent = message;
+      backendHealthy = false;
+    }
+
+    function renderFiles(files) {
+      fileList.innerHTML = "";
+      if (!files || files.length === 0) {
+        fileList.innerHTML = '<div class="empty">当前输出目录里还没有文件，或者这次任务是仅列出模式。</div>';
+        return;
+      }
+      for (const file of files) {
+        const item = document.createElement("div");
+        item.className = "file-item";
+        item.innerHTML = `
+          <div class="file-name">${file.name}</div>
+          <div class="file-meta">
+            <span>${bytesToHuman(file.size)}</span>
+            <span>${formatTimestamp(file.modified_at)}</span>
+          </div>
+          <div><code>${file.path}</code></div>
+        `;
+        fileList.appendChild(item);
+      }
+    }
+
+    function applyStatusPill(status) {
+      const labels = {
+        idle: "空闲",
+        running: "运行中",
+        stopping: "正在终止",
+        stopped: "已终止",
+        completed: "已完成",
+        failed: "失败",
+      };
+      statusPill.className = `status-pill ${status || "idle"}`;
+      statusPill.textContent = labels[status] || status || "空闲";
+    }
+
+    function renderState(snapshot) {
+      applyStatusPill(snapshot.status);
+      jobIdValue.textContent = snapshot.job_id || "-";
+      startedAtValue.textContent = formatTimestamp(snapshot.started_at);
+      endedAtValue.textContent = formatTimestamp(snapshot.ended_at);
+      returnCodeValue.textContent = snapshot.returncode ?? "-";
+      outputDirValue.textContent = snapshot.output_dir || formEls.outputDir.value || "-";
+      logBox.textContent = snapshot.logs || "等待启动…";
+      logBox.scrollTop = logBox.scrollHeight;
+      renderFiles(snapshot.files || []);
+      renderProgress(snapshot.progress, snapshot.status);
+      setBackendBanner("");
+
+      const isRunning = snapshot.status === "running" || snapshot.status === "stopping";
+      startButton.disabled = isRunning;
+      stopButton.disabled = !isRunning;
+    }
+
+    async function refreshState() {
+      try {
+        const snapshot = await api("/api/state", { method: "GET" });
+        renderState(snapshot);
+      } catch (error) {
+        const hint = location.protocol === "file:"
+          ? "你现在很可能是直接双击打开了 HTML 文件。这个页面需要先运行 `启动PRL下载面板.bat`，再通过浏览器访问本地地址。"
+          : "本地后端还没启动。请先运行 `启动PRL下载面板.bat`，或者用 `python prl_downloader_webui.py` 启动服务。";
+        setBackendBanner(hint);
+        logBox.textContent = `状态拉取失败：${error.message}`;
+        startButton.disabled = true;
+        stopButton.disabled = true;
+      }
+    }
+
+    function startPolling() {
+      if (pollTimer) return;
+      pollTimer = window.setInterval(refreshState, 1500);
+    }
+
+    async function startJob() {
+      if (!backendHealthy) {
+        alert("本地后端没连上。请先运行 `启动PRL下载面板.bat`，不要直接双击 HTML。");
+        return;
+      }
+      if (selectedSources().length === 0) {
+        alert("至少勾选一个查询站点。");
+        return;
+      }
+      try {
+        const payload = getFormData();
+        const snapshot = await api("/api/start", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        renderState(snapshot);
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function stopJob() {
+      if (!backendHealthy) {
+        alert("本地后端没连上，当前没有可终止的任务。");
+        return;
+      }
+      try {
+        const snapshot = await api("/api/stop", {
+          method: "POST",
+          body: JSON.stringify({}),
+        });
+        renderState(snapshot);
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    async function openOutputFolder() {
+      if (!backendHealthy) {
+        alert("本地后端没连上。请先运行 `启动PRL下载面板.bat`。");
+        return;
+      }
+      try {
+        await api("/api/open-folder", {
+          method: "POST",
+          body: JSON.stringify({ path: formEls.outputDir.value.trim() }),
+        });
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    function bindEvents() {
+      heroDate.textContent = appConfig.currentDate;
+      for (const element of Object.values(formEls)) {
+        const eventName = element.type === "checkbox" ? "change" : "input";
+        element.addEventListener(eventName, () => {
+          syncToggleState();
+          updatePreview();
+        });
+      }
+      for (const input of sourceInputs()) {
+        input.addEventListener("change", () => {
+          syncToggleState();
+          updatePreview();
+        });
+      }
+
+      startButton.addEventListener("click", startJob);
+      stopButton.addEventListener("click", stopJob);
+      openFolderButton.addEventListener("click", openOutputFolder);
+    }
+
+    renderSourceOptions();
+    fillForm();
+    bindEvents();
+    startPolling();
+    refreshState();
+  </script>
+</body>
+</html>

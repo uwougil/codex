@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.claude/
+.claudian/
+.playwright-cli/
+.obsidian/workspace.json
